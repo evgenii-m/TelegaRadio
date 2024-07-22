@@ -110,7 +110,6 @@ async def generate_sysinfo(workdir):
     filters.command("ping", prefixes=".")
     & (filters.group | filters.private)
     & self_or_contact_filter
-    & ~filters.edited
     & ~filters.bot
     & ~filters.via_bot
     )
@@ -127,7 +126,6 @@ async def ping_pong(_, m: Message):
     filters.command("uptime", prefixes=".")
     & (filters.group | filters.private)
     & self_or_contact_filter
-    & ~filters.edited
     & ~filters.bot
     & ~filters.via_bot
     )
@@ -146,7 +144,6 @@ async def get_uptime(_, m: Message):
     filters.command("sysinfo", prefixes=".")
     & (filters.group | filters.private)
     & self_or_contact_filter
-    & ~filters.edited
     & ~filters.bot
     & ~filters.via_bot
     )

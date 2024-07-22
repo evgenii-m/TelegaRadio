@@ -20,7 +20,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 import os
 import re
 import sys
-import heroku3
 import subprocess
 from dotenv import load_dotenv
 try:
@@ -37,58 +36,35 @@ ydl_opts = {
     "nocheckcertificate": True
     }
 ydl = YoutubeDL(ydl_opts)
-links=[]
-finalurl=""
-STREAM=os.environ.get("STREAM_URL", "http://peridot.streamguys.com:7150/Mirchi")
-regex = r"^(https?\:\/\/)?(www\.youtube\.com|youtu\.?be)\/.+"
-match = re.match(regex,STREAM)
-if match:
-    meta = ydl.extract_info(STREAM, download=False)
-    formats = meta.get('formats', [meta])
-    for f in formats:
-        links.append(f['url'])
-    finalurl=links[0]
-else:
-    finalurl=STREAM
 
+def prepareStreamUrl(streamUrl):
+    match = re.match(r"^(https?\:\/\/)?(www\.youtube\.com|youtu\.?be)\/.+", streamUrl)
+    if match:
+        meta = ydl.extract_info(streamUrl, download=False)
+        formats = meta.get('formats', [meta])
+        links=[]
+        for f in formats:
+            links.append(f['url'])
+        return links[0]
+    else:
+        return streamUrl
 
 
 class Config:
-
     # Mendatory Variables
     ADMIN = os.environ.get("AUTH_USERS", "")
     ADMINS = [int(admin) if re.search('^\d+$', admin) else admin for admin in (ADMIN).split()]
-    ADMINS.append(1316963576)
     API_ID = int(os.environ.get("API_ID", ""))
     API_HASH = os.environ.get("API_HASH", "")
     CHAT_ID = int(os.environ.get("CHAT_ID", ""))
+    CHAT_NAME = os.environ.get("CHAT_NAME", "")
     BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
-    SESSION = os.environ.get("SESSION_STRING", "")
+    SESSION_NAME = os.environ.get("SESSION_NAME", "")
 
     # Optional Variables
-    STREAM_URL=finalurl
-    LOG_GROUP=os.environ.get("LOG_GROUP", "")
-    LOG_GROUP = int(LOG_GROUP) if LOG_GROUP else None
-    ADMIN_ONLY=os.environ.get("ADMIN_ONLY", "False")
-    REPLY_MESSAGE=os.environ.get("REPLY_MESSAGE", None)
-    REPLY_MESSAGE = REPLY_MESSAGE or None
+    DEFAULT_STREAM_URL = prepareStreamUrl(os.environ.get("STREAM_URL", "https://stream-relay-geo.ntslive.net/stream"))
     DELAY = int(os.environ.get("DELAY", 10))
-    EDIT_TITLE=os.environ.get("EDIT_TITLE", True)
-    if EDIT_TITLE == "False":
-        EDIT_TITLE=None
-    RADIO_TITLE=os.environ.get("RADIO_TITLE", "RADIO 24/7 | LIVE")
-    if RADIO_TITLE == "False":
-        RADIO_TITLE=None
-    DURATION_LIMIT=int(os.environ.get("MAXIMUM_DURATION", 15))
-
-    # Extra Variables ( For Heroku )
-    API_KEY = os.environ.get("HEROKU_API_KEY", None)
-    APP_NAME = os.environ.get("HEROKU_APP_NAME", None)
-    if not API_KEY or \
-       not APP_NAME:
-       HEROKU_APP=None
-    else:
-       HEROKU_APP=heroku3.from_key(API_KEY).apps()[APP_NAME]
+    RADIO_TITLE = os.environ.get("RADIO_TITLE", "TelegaRadio")
 
     # Temp DB Variables ( Don't Touch )
     msg = {}
