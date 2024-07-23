@@ -57,7 +57,6 @@ USERNAME=e.username
 from user import USER
 
 ADMINS=Config.ADMINS
-DEFAULT_STREAM_URL=Config.DEFAULT_STREAM_URL
 CHAT_ID=Config.CHAT_ID
 CHAT_NAME=Config.CHAT_NAME
 RADIO_TITLE=Config.RADIO_TITLE
@@ -82,7 +81,7 @@ class MusicPlayer(object):
         self.group_call = GroupCallFactory(USER, GroupCallFactory.MTPROTO_CLIENT_TYPE.PYROGRAM).get_file_group_call()
 
 
-    async def start_radio(self):
+    async def start_radio(self, station_stream_url):
         group_call = self.group_call
         if group_call.is_connected:
             playlist.clear()   
@@ -96,7 +95,6 @@ class MusicPlayer(object):
                 print(e)
                 pass
             FFMPEG_PROCESSES[CHAT_ID] = ""
-        station_stream_url = DEFAULT_STREAM_URL
         try:
             RADIO.remove(0)
         except:

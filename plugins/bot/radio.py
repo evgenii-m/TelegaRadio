@@ -54,8 +54,9 @@ async def start_radio(_, message: Message):
         await mp.delete(k)
         await message.delete()
         return
-    await mp.start_radio()
-    k=await message.reply_text(f"{emoji.CHECK_MARK_BUTTON} **Radio Stream Started :** \n<code>{DEFAULT_STREAM_URL}</code>")
+    station_stream_url = message.text
+    await mp.start_radio(station_stream_url)
+    k=await message.reply_text(f"{emoji.CHECK_MARK_BUTTON} **Radio Stream Started :** \n<code>{station_stream_url}</code>")
     await mp.delete(k)
     await mp.delete(message)
 

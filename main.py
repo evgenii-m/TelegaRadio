@@ -28,6 +28,7 @@ from config import Config
 from utils import mp
 from pyrogram.types import BotCommand, BotCommandScopeDefault
 
+DEFAULT_STREAM_URL=Config.DEFAULT_STREAM_URL
 
 bot = Client(
     "TelegaRadioPlayer",
@@ -42,7 +43,7 @@ if not os.path.isdir("./downloads"):
 
 async def main():
     async with bot:
-        await mp.start_radio()
+        await mp.start_radio(DEFAULT_STREAM_URL)
 
 def stop_and_restart():
     bot.stop()

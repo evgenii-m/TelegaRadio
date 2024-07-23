@@ -12,6 +12,5 @@ RUN python3 -m pip install -U pip
 COPY . .
 
 RUN python3 -m pip install -U -r requirements.txt
-RUN python3 -m pip install -U yt-dlp==2024.7.16
 
 CMD ["python3", "main.py"]
