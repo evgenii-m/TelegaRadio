@@ -43,7 +43,7 @@ if not os.path.isdir("./downloads"):
 
 async def main():
     async with bot:
-        await mp.start_radio(DEFAULT_STREAM_URL)
+        await mp.start_radio_by_stream_url(DEFAULT_STREAM_URL)
 
 def stop_and_restart():
     bot.stop()
@@ -64,8 +64,12 @@ bot.set_bot_commands(
             description="Start The Bot"
         ),
         BotCommand(
-            command="radio",
-            description="Start Radio Stream by URL"
+            command="stream",
+            description="Start Radio by Stream URL"
+        ),
+        BotCommand(
+            command="file",
+            description="Start Radio by Aduio File"
         ),
         BotCommand(
             command="stopradio",

@@ -67,13 +67,27 @@ RADIO={6}
 playlist=Config.playlist
 msg=Config.msg
 
-ydl_opts = {
-    "format": "bestaudio[ext=m4a]",
-    "geo-bypass": True,
-    "nocheckcertificate": True,
-    "outtmpl": "downloads/%(id)s.%(ext)s",
-}
-ydl = YoutubeDL(ydl_opts)
+playlistItems = {}
+
+class PlaylistItem:
+    def __init__(
+        self, 
+        title: str, 
+        file_id: int,
+        user: str
+    ):
+        self.title = title
+        self.file_id = file_id
+        self.user = user
+
+    def __repr__(self):
+        return f"PlaylistItem(title={self.title!r}, file_id={self.file_id!r}, user={self.user!r})"
+     
+    def __eq__(self, other):
+        if other.__class__ is self.__class__:
+            return (self.title, self.file_id, self.user) == (other.title, other.file_id, other.user)
+        return NotImplemented
+
 
 
 class MusicPlayer(object):
@@ -81,7 +95,7 @@ class MusicPlayer(object):
         self.group_call = GroupCallFactory(USER, GroupCallFactory.MTPROTO_CLIENT_TYPE.PYROGRAM).get_file_group_call()
 
 
-    async def start_radio(self, station_stream_url):
+    async def start_radio_by_stream_url(self, station_stream_url):
         group_call = self.group_call
         if group_call.is_connected:
             playlist.clear()   
@@ -132,6 +146,41 @@ class MusicPlayer(object):
                 await self.start_call()
                 await sleep(10)
                 continue
+
+
+    async def start_radio_by_file(self, file_id):
+        group_call = self.group_call
+        client = group_call.client
+        raw_file = os.path.join(client.workdir, DEFAULT_DOWNLOAD_DIR, f"{file_id}.raw")
+        if not os.path.isfile(raw_file):
+            original_file = await bot.download_media(f"{file_id}")
+            ffmpeg.input(original_file).output(
+                raw_file,
+                format='s16le',
+                acodec='pcm_s16le',
+                ac=2,
+                ar='48k',
+                loglevel='error'
+            ).overwrite_output().run()
+            if 1 in RADIO:
+                if group_call:
+                    group_call.input_filename = ''
+                    RADIO.remove(1)
+                    RADIO.add(0)
+                process = FFMPEG_PROCESSES.get(CHAT_ID)
+                if process:
+                    try:
+                        process.send_signal(SIGINT)
+                    except subprocess.TimeoutExpired:
+                        process.kill()
+                    except Exception as e:
+                        print(e)
+                        pass
+                    FFMPEG_PROCESSES[CHAT_ID] = ""
+            if not group_call.is_connected:
+                await mp.start_call()
+            group_call.input_filename = raw_file
+            print(f"- START PLAYING: {raw_file}")
 
 
     async def stop_radio(self):
@@ -232,4 +281,4 @@ async def on_network_changed(call, is_connected):
 
 @mp.group_call.on_playout_ended
 async def playout_ended_handler(_, __):
-    await mp.start_radio()
+    await mp.start_radio_from_stream()

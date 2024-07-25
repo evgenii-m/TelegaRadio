@@ -39,7 +39,7 @@ async def is_admin(_, client, message: Message):
 ADMINS_FILTER = filters.create(is_admin)
 
 
-allcmd = ["start", "radio", "stopradio", "help"]
+allcmd = ["start", "stream", "file", "stopradio", "help"]
 
 @Client.on_message(filters.command(allcmd) & filters.group & ~filters.chat(CHAT_ID))
 async def not_chat(_, m: Message):
@@ -47,21 +47,51 @@ async def not_chat(_, m: Message):
     await mp.delete(m)
 
 
-@Client.on_message(filters.command(["radio", f"radio@{USERNAME}"]) & ADMINS_FILTER & (filters.chat(CHAT_ID) | filters.private))
-async def start_radio(_, message: Message):
+@Client.on_message(filters.command(["stream"]) & ADMINS_FILTER & (filters.chat(CHAT_ID) | filters.private))
+async def start_radio_by_stream_url(_, message: Message):
     if 1 in RADIO:
         k=await message.reply_text(f"{emoji.ROBOT} **Please Stop Existing Radio Stream!**")
         await mp.delete(k)
         await message.delete()
         return
     station_stream_url = message.text.split()[-1]
-    await mp.start_radio(station_stream_url)
-    k=await message.reply_text(f"{emoji.CHECK_MARK_BUTTON} **Radio Stream Started :** \n<code>{station_stream_url}</code>")
+    await mp.start_radio_by_stream_url(station_stream_url)
+    k=await message.reply_text(f"**Radio Stream Started by URL:** \n<code>{station_stream_url}</code>")
     await mp.delete(k)
     await mp.delete(message)
 
 
-@Client.on_message(filters.command(["stopradio", f"stopradio@{USERNAME}"]) & ADMINS_FILTER & (filters.chat(CHAT_ID) | filters.private))
+@Client.on_message(filters.command(["file"]) & ADMINS_FILTER & (filters.chat(CHAT_ID) | filters.private))
+async def start_radio_by_file(_, message: Message):
+    if 1 in RADIO:
+        k=await message.reply_text(f"{emoji.ROBOT} **Please Stop Existing Radio Stream!**")
+        await mp.delete(k)
+        await message.delete()
+        return
+    if message.audio:
+        audio = message.audio
+        file_id = audio.file_id
+        await mp.start_radio_by_file(file_id)
+        k=await message.reply_text(
+            f"**Radio Stream Started by file:** \n<code>{audio.title} ({audio.file_id})</code>")
+        await mp.delete(k)
+        await mp.delete(message)
+    elif message.reply_to_message and message.reply_to_message.audio:
+        audio = message.reply_to_message.audio
+        file_id = audio.file_id
+        await mp.start_radio_by_file(file_id)
+        k=await message.reply_text(
+            f"**Radio Stream Started by file:** \n<code>{audio.title} ({audio.file_id})</code>")
+        await mp.delete(k)
+        await mp.delete(message)
+    else:
+        k=await message.reply_text(f"**Audio file attachment is needed")
+        await mp.delete(k)
+        await mp.delete(message)
+
+
+
+@Client.on_message(filters.command(["stopradio"]) & ADMINS_FILTER & (filters.chat(CHAT_ID) | filters.private))
 async def stop_radio(_, message: Message):
     if 0 in RADIO:
         k=await message.reply_text(f"{emoji.ROBOT} **Please Start A Radio Stream First!**")
@@ -74,15 +104,14 @@ async def stop_radio(_, message: Message):
     await mp.delete(message)
 
 
-
-@Client.on_message(filters.command(["start", f"start@{USERNAME}"]))
+@Client.on_message(filters.command(["start"]) & ADMINS_FILTER & (filters.chat(CHAT_ID) | filters.private))
 async def start(client, message):
     m=await message.reply_text("Bot started...")
     await mp.delete(m)
     await mp.delete(message)
 
 
-@Client.on_message(filters.command(["help", f"help@{USERNAME}"]))
+@Client.on_message(filters.command(["help"]) & ADMINS_FILTER & (filters.chat(CHAT_ID) | filters.private))
 async def help(client, message):
     if msg.get('help') is not None:
         await msg['help'].delete()
