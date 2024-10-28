@@ -117,14 +117,14 @@ class MusicPlayer(object):
             RADIO.add(1)
         except:
             pass
-        if os.path.exists(f'radio-{CHAT_ID}.raw'):
-            os.remove(f'radio-{CHAT_ID}.raw')
+        if os.path.exists(f'radio_data/radio-{CHAT_ID}.raw'):
+            os.remove(f'radio_data/radio-{CHAT_ID}.raw')
         # credits: https://t.me/c/1480232458/6825
-        os.mkfifo(f'radio-{CHAT_ID}.raw')
-        group_call.input_filename = f'radio-{CHAT_ID}.raw'
+        os.mkfifo(f'radio_data/radio-{CHAT_ID}.raw')
+        group_call.input_filename = f'radio_data/radio-{CHAT_ID}.raw'
         if not group_call.is_connected:
             await self.start_call()
-        ffmpeg_log = open("ffmpeg.log", "w+")
+        ffmpeg_log = open("logs/ffmpeg.log", "w+")
         command=["ffmpeg", "-y", "-i", station_stream_url, "-f", "s16le", "-ac", "2",
         "-ar", "48000", "-acodec", "pcm_s16le", group_call.input_filename]
 
@@ -151,7 +151,7 @@ class MusicPlayer(object):
     async def start_radio_by_file(self, file_id):
         group_call = self.group_call
         client = group_call.client
-        raw_file = os.path.join(client.workdir, DEFAULT_DOWNLOAD_DIR, f"{file_id}.raw")
+        raw_file = os.path.join(client.workdir, DEFAULT_DOWNLOAD_DIR, f"radio_data/{file_id}.raw")
         if not os.path.isfile(raw_file):
             original_file = await bot.download_media(f"{file_id}")
             ffmpeg.input(original_file).output(
