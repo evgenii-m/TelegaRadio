@@ -9,8 +9,6 @@ RUN apt-get install --fix-missing -y curl ffmpeg libavformat-dev libavdevice-dev
 #Updating pip
 RUN python3 -m pip install -U pip
 
-MKDIR radio_data
-
 COPY . .
 
 RUN python3 -m pip install -U -r requirements.txt

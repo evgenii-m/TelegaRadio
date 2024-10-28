@@ -124,7 +124,7 @@ class MusicPlayer(object):
         group_call.input_filename = f'radio_data/radio-{CHAT_ID}.raw'
         if not group_call.is_connected:
             await self.start_call()
-        ffmpeg_log = open("logs/ffmpeg.log", "w+")
+        ffmpeg_log = open("ffmpeg.log", "w+")
         command=["ffmpeg", "-y", "-i", station_stream_url, "-f", "s16le", "-ac", "2",
         "-ar", "48000", "-acodec", "pcm_s16le", group_call.input_filename]
 
