@@ -130,10 +130,8 @@ class MusicPlayer(object):
 
         process = await asyncio.create_subprocess_exec(
             *command,
-            stdout=asyncio.subprocess.PIPE, 
-            stderr=asyncio.subprocess.PIPE
-            # stdout=ffmpeg_log,
-            # stderr=asyncio.subprocess.STDOUT,
+            stdout=ffmpeg_log,
+            stderr=asyncio.subprocess.STDOUT,
             )
 
         FFMPEG_PROCESSES[CHAT_ID] = process
@@ -148,25 +146,6 @@ class MusicPlayer(object):
                 await self.start_call()
                 await sleep(10)
                 continue
-        asyncio.run(handle_process_std(process))
-
-
-    async def handle_process_std(process):
-        while True:
-            if process.stdout.at_eof() and process.stderr.at_eof():
-                break
-
-            stdout = (await process.stdout.readline()).decode()
-            if stdout:
-                print(f'[ffmpeg-stdout] {stdout}', end='', flush=True)
-            stderr = (await process.stderr.readline()).decode()
-            if stderr:
-                print(f'[ffmpeg-sdterr] {stderr}', end='', flush=True, file=sys.stderr)
-
-            await asyncio.sleep(1)
-
-        await process.communicate()
-
 
     async def start_radio_by_file(self, file_id):
         group_call = self.group_call
