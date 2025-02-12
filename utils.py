@@ -117,14 +117,14 @@ class MusicPlayer(object):
             RADIO.add(1)
         except:
             pass
-        if os.path.exists(f'radio_data/radio-{CHAT_ID}.raw'):
-            os.remove(f'radio_data/radio-{CHAT_ID}.raw')
-        # credits: https://t.me/c/1480232458/6825
-        os.mkfifo(f'radio_data/radio-{CHAT_ID}.raw')
-        group_call.input_filename = f'radio_data/radio-{CHAT_ID}.raw'
+        raw_file_path = f'radio_data/radio-{CHAT_ID}.raw'
+        if os.path.exists(raw_file_path):
+            os.remove(raw_file_path)
+        os.mkfifo(raw_file_path)
+        group_call.input_filename = raw_file_path
         if not group_call.is_connected:
             await self.start_call()
-        ffmpeg_log = open("ffmpeg.log", "w+")
+        ffmpeg_log = open("misc/ffmpeg.log", "w+")
         command=["ffmpeg", "-y", "-i", station_stream_url, "-f", "s16le", "-ac", "2",
         "-ar", "48000", "-acodec", "pcm_s16le", group_call.input_filename]
 
